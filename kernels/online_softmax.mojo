@@ -21,6 +21,7 @@ alias scores_tile_layout = Layout.row_major(BLOCK_M, BLOCK_N)
 alias output_layout = Layout.row_major(M_DIM, N_DIM)
 alias row_stats_layout = Layout.row_major(M_DIM, 2)
 
+
 fn online_softmax_update_kernel[
     scores_tile_layout: Layout,
     output_layout: Layout,
@@ -91,7 +92,9 @@ def main():
         var scores_tile_buffer = ctx.enqueue_create_buffer[dtype](
             scores_tile_layout.size()
         )
-        var output_buffer = ctx.enqueue_create_buffer[dtype](output_layout.size())
+        var output_buffer = ctx.enqueue_create_buffer[dtype](
+            output_layout.size()
+        )
         var row_stats_buffer = ctx.enqueue_create_buffer[dtype](
             row_stats_layout.size()
         )
@@ -140,9 +143,7 @@ def main():
                 block_dim=TPB,
             )
 
-        ctx.enqueue_function[
-            normalize_kernel[output_layout, row_stats_layout]
-        ](
+        ctx.enqueue_function[normalize_kernel[output_layout, row_stats_layout]](
             output_tensor,
             row_stats_tensor,
             grid_dim=blocks_per_grid,
